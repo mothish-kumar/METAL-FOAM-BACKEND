@@ -1,0 +1,11 @@
+productName,materialType,materialSpecification,quantity,thickness,volume,temperature,processingTime,qualityString,density,thermalConductivity,flexuralStrength,tensileStrength,porosity
+Aluminum,Metal,Lightweight,353,3.53,190.45,363.02,13.43,Low Quality,7.48,126.4,915,239,0.0128
+Aluminum,Metal,Lightweight,119,3.49,66.1,181.99,25.21,Medium Quality,5.26,189.4,983,907,0.0352
+Titanium,Metal,Corrosion Resistant,119,4.46,49.55,233.69,56.35,Medium Quality,7.73,62.79,799,989,0.0333
+Steel,Alloy,High Tensile Strength,165,3.36,193.12,320.18,42.74,Premium Quality,5.67,142.55,323,960,0.0154
+Titanium,Metal,Corrosion Resistant,391,1.09,198.22,318.99,58.82,Medium Quality,4.24,156.03,404,777,0.0497
+Steel,Alloy,High Tensile Strength,190,4.38,87.71,307.78,20.48,Medium Quality,7.21,209.61,633,544,0.0453
+Brass,Alloy,Corrosion Resistant,50,4.28,173.15,298.23,42.2,High Quality,6.31,197.14,306,456,0.0273
+Copper,Metal,Good Conductivity,222,4.68,31.09,339.83,26.45,Medium Quality,6.38,121.23,920,602,0.0065
+Titanium,Metal,Corrosion Resistant,304,4.6,37.87,433.08,37.52,Low Quality,7.0,159.12,295,257,0.0107
+Copper,Metal,Good Conductivity,465,2.14,160.68,274.52,32.22,Low Quality,3.71,75.35,462,438,0.0211
