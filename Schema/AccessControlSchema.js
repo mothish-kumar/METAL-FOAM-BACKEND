@@ -4,7 +4,8 @@ const accessControlSchema = new mongoose.Schema({
     employeeId: {
         type: String,
         required: true,
-        ref: 'Employee'
+        ref: 'Employee',
+        unique: true
     },
     accessType: {
         type: String,

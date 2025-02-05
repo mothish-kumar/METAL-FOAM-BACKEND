@@ -14,4 +14,11 @@ const account = web3.eth.accounts.privateKeyToAccount(process.env.BLOCKCHAIN_PRI
 web3.eth.accounts.wallet.add(account);
 web3.eth.defaultAccount = account.address;
 
+//Check balance
+// web3.eth.getBalance(process.env.BLOCKCHAIN_PUBLIC_KEY)
+//   .then(balance => {
+//     console.log(`Balance: ${web3.utils.fromWei(balance, "ether")} ETH`);
+//   })
+//   .catch(err => console.error("Error fetching balance:", err));
+
 export default web3;

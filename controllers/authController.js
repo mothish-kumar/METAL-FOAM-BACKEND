@@ -3,10 +3,12 @@ import Employee from "../Schema/EmployeeSchema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+
 export const login = async (req, res) => {
     try {
         const { username, password } = req.body;
         const user = await Login.findOne({ username });
+        const employee = await Employee.findOne({ employeeId:username})
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -14,8 +16,8 @@ export const login = async (req, res) => {
         if (!isMatch) {
                 return res.status(401).json({ error: 'Invalid password' });
         }
-        const accesstoken = jwt.sign({ username: user.username }, process.env.JWT_SECRET_ACCESS, { expiresIn: '1h' });
-        const refreshToken = jwt.sign({ username: user.username }, process.env.JWT_SECRET_REFRESH, { expiresIn: '7d' });
+        const accesstoken = jwt.sign({ username: user.username,role:employee.role }, process.env.JWT_SECRET_ACCESS, { expiresIn: '1h' });
+        const refreshToken = jwt.sign({ username: user.username,role:employee.role }, process.env.JWT_SECRET_REFRESH, { expiresIn: '7d' });
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production' ? true : false,
@@ -71,7 +73,7 @@ export const refreshToken = async (req, res) => {
     }
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET_REFRESH);
     
-    const newAccessToken = jwt.sign({ username: decoded.username }, process.env.JWT_SECRET_ACCESS, { expiresIn: '1h' });
+    const newAccessToken = jwt.sign({ username: decoded.username,role:decoded.role }, process.env.JWT_SECRET_ACCESS, { expiresIn: '1h' });
     res.status(200).json({ accesstoken: newAccessToken });
    } catch (error) {
         console.error('Error during refresh token:', error);

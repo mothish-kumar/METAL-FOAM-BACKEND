@@ -8,6 +8,7 @@ import { generatePassword } from "../utils/generatePassword.js";
 import AccessControl from '../Schema/AccessControlSchema.js';
 import Login from "../Schema/LoginSchema.js";
 import bcrypt from "bcrypt";
+import web3 from "../config/Web3Config.js";
 // data management
 export const uploadCSV = async (req, res) => {
     try {
@@ -302,7 +303,6 @@ export const updateProduct = async (req, res) => {
 export const approveEmployee = async (req, res) => {
     try {
         const { employeeId } = req.params;
-        console.log(employeeId)
         // Find employee and make sure it exists
         const employee = await Employee.findOne({employeeId: employeeId});
         if (!employee) {
@@ -340,7 +340,7 @@ export const approveEmployee = async (req, res) => {
         
         res.status(200).json({ 
             message: 'Employee approved successfully',
-            employeeId: employee._id,
+            employeeId: username,
             status: 'approved',
             emailSent: false
         });
@@ -548,5 +548,32 @@ export const getLoggedInUsers = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+//Get the transaction history
+export const getTransactionHistory = async (req, res) => {
+    try {
+        const blockNumber = await web3.eth.getBlockNumber();
+    let transactions = []
+    for (let i = 1; i <= blockNumber; i++){
+        const block = await web3.eth.getBlock(i, true);
+        if (block && block.transactions) {
+            block.transactions.forEach(tx => {
+                transactions.push({
+                    blockNumber: block.number.toString(),
+                    from: tx.from,
+                    to: tx.to,
+                    value: web3.utils.fromWei(tx.value.toString(), 'ether'), // Convert value to ether
+                    gasUsed: tx.gas.toString(),
+                    hash: tx.hash,
+                });
+            });
+        }
+    }
+    res.status(200).json(transactions)
+    } catch(error) {
+        res.status(500).json({ error: "Error on getting Transaction History" })
+        console.error('Error fetching transaction history:', error);
+    }
+}
 
 
