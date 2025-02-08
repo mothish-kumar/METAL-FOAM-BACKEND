@@ -28,7 +28,12 @@ const accessControlSchema = new mongoose.Schema({
         type: String,
         enum: ['active', 'expired', 'pending','denied'],
         default: 'pending'
-    }
+    },
+    role: {
+        type: String,
+        enum: ["admin", "resource_analyst", "design_support"],
+        required: true
+    },
 }, { collection: 'access_control' });
 
 const AccessControl = mongoose.model("AccessControl", accessControlSchema);

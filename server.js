@@ -9,6 +9,8 @@ import connectDB from './config/db.js';
 import authRouter from './routes/authRoute.js';
 import resourceAnalystRouter from './routes/resourceAnalystRoute.js';
 import cookieParser from 'cookie-parser';
+import designSupportRouter from './routes/designSupportRoutes.js';
+
 dotenv.config();
 
 const app = express();
@@ -26,6 +28,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/employee', employeeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/resource-analyst', resourceAnalystRouter);
+app.use('/api/design-support', designSupportRouter);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

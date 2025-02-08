@@ -319,7 +319,8 @@ export const approveEmployee = async (req, res) => {
         const login = new Login({username, password: hashedPassword});
         await login.save();
         await employee.save();
-
+        console.log('Username', username);
+        console.log('Password', password);
         // Email content
         const emailContent = `
         Dear ${employee.name},
@@ -431,7 +432,7 @@ export const deleteEmployee = async (req, res) => {
 //get all access requests
 export const getAccessRequests = async (req, res) => {
     try {
-        const accessRequests = await AccessControl.find({ status: "pending" });
+        const accessRequests = await AccessControl.find({ status: "pending",role:"resource_analyst" });
         if (accessRequests.length === 0) {
             return res.status(404).json({ error: 'No access requests found' });
         }
@@ -446,6 +447,7 @@ export const getAccessRequests = async (req, res) => {
 // Grant access to read the product data
 export const grantAccess = async (req, res) => {
     try {
+        const adminId = req.username;
         const { employeeId } = req.params;
         const { duration } = req.body;  // duration should be in days
         const accessType = "read";
@@ -471,7 +473,7 @@ export const grantAccess = async (req, res) => {
             { employeeId },
             {
                 accessType,
-                grantedBy: "adminId",
+                grantedBy: adminId,
                 grantedAt: new Date(),
                 expiresAt: expiresAt,
                 status: 'active'

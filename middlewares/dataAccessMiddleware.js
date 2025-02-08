@@ -6,7 +6,6 @@ export const dataAccessMiddleware = async (req, res, next) => {
     if (!accessControl) {
         return res.status(404).json({ error: "You don't make request to access the data" })
     }
-    console.log(accessControl.status)
     if(accessControl.status === 'active') {
         return next();
     }
