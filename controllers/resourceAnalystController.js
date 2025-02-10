@@ -421,7 +421,7 @@ export const grantAccess = async (req, res) => {
         Expires On: ${expiresAt.toLocaleDateString()}
 
         Best regards,
-        Admin Team
+        Resource Analyst Team
         `;
 
         await sendMail(employee.email, 'Access Request Approved', emailContent);
@@ -449,7 +449,7 @@ export const denyAccess = async (req, res) => {
         const emailContent = `
         Dear ${employee.name},
 
-        Your access request has been denied.More information will be provided by the admin team.
+        Your access request has been denied.More information will be provided by the resource analyst team.
         `;
         await sendMail(employee.email, 'Access Request Denied', emailContent);
         res.status(200).json({ message: 'Access request denied successfully' });

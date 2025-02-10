@@ -3,7 +3,7 @@ import { dataAccessMiddleware } from '../middlewares/dataAccessMiddleware.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import {designSupportMiddleware} from '../middlewares/designSupportMiddleware.js';
 import { getAllData, getSingleData } from '../controllers/resourceAnalystController.js';
-import { processMaterial,predictWelding,saveData } from '../controllers/designSupportController.js';
+import { processMaterial,predictWelding,saveData,getAllData as getAllDataController,getSingleData as GSD,updateData,deleteData,getAllRequests,grantAccess } from '../controllers/designSupportController.js';
 
 
 const router = express.Router();
@@ -18,5 +18,14 @@ router.post('/predict-welding', authMiddleware, designSupportMiddleware, predict
 
 //save data
 router.post('/save-data/:productId', authMiddleware, designSupportMiddleware, saveData);
+router.get('/get-all-data', authMiddleware, designSupportMiddleware, getAllDataController);
+router.get('/get-single-design-data/:txnHash', authMiddleware, designSupportMiddleware, GSD);
+router.put('/update-design-data/:txnHash', authMiddleware, designSupportMiddleware, updateData);
+router.delete('/delete-design-data/:txnHash', authMiddleware, designSupportMiddleware, deleteData);
+
+// access the data
+router.get('/get-all-requests', authMiddleware, designSupportMiddleware, getAllRequests);
+router.post('/grant-access/:txnHash', authMiddleware, designSupportMiddleware, grantAccess);
+
 
 export default router;
