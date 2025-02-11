@@ -3,6 +3,7 @@ import { decryptData } from "../utils/encryption.js";
 import ProductionAccessRequest from "../Schema/ProductionAccessRequestSchema.js";
 import RejectedProduct from "../Schema/rejectedProductSchema.js";
 import Production from "../Schema/ProductionSchema.js";
+import QualityControl from "../Schema/QualityControlSchema.js";
 
 export const getAllData = async (req, res) => { 
     try {
@@ -212,7 +213,16 @@ export const sendQualityCheck = async (req, res) => {
                 'productionReport.weldingQuality': weldingQuality,
                 'productionReport.recommendations': recommendations
             });
-        res.status(200).json({ message: 'Product sent for quality check' });
+        const productId = production.productId
+        const data = await ProductionAccessRequest.findOne({ employeeId: productionEmployeeId, productId })
+        const productName = data.productName;
+        const transactionHash = data.transactionHash
+        try {
+            await QualityControl.create({ productId, productionId,productName,productTransactionHash:transactionHash})
+            res.status(200).json({ message: 'Product sent for quality check' });
+        } catch (error) {
+            res.status(500).json({error:error.message})
+        }
 
     } catch (error) {
         res.status(500).json({error:error.message})

@@ -25,11 +25,6 @@ const productionSchema = new mongoose.Schema({
     },
 
     sentForQualityCheckAt: { type: Number },
-    qualityCheckReport: {
-        qualityCheckStatus: { type: String ,enum:["Pending","Approved","Rework"]},
-        qualityEmployeeId: { type: String },
-        qualityCheckComments: { type: String }
-    },
     productionEmployeeId: { type: String,required: true },
 
 }, { timestamps: true, collection: 'production' });

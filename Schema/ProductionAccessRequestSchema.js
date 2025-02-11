@@ -16,12 +16,11 @@ const ProductionAccessRequestSchema = new mongoose.Schema({
     transactionHash: {
         type: String,
         required: true,
-        unique: true
     },
     requestStatus: {
         type: String,
         enum: ['approved', 'pending', 'denied'],
-        required: true
+        default:'pending',
     },
     accessType: {
         type: String,
@@ -30,7 +29,7 @@ const ProductionAccessRequestSchema = new mongoose.Schema({
     },
     grantedBy: {
         type: String,
-        required: true
+
     },
     grantedAt: {
         type: Date,
@@ -38,7 +37,6 @@ const ProductionAccessRequestSchema = new mongoose.Schema({
     },
     expiresAt: {
         type: Date,
-        required: true
     }
 }, { collection: 'productionRequests' });
 
