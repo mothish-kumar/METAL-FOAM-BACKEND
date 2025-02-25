@@ -7,8 +7,11 @@ import { sendMail } from "../utils/mailSender.js";
 import { generatePassword } from "../utils/generatePassword.js";
 import AccessControl from '../Schema/AccessControlSchema.js';
 import Login from "../Schema/LoginSchema.js";
+import RejectedProduct from "../Schema/rejectedProductSchema.js";
 import bcrypt from "bcrypt";
 import web3 from "../config/Web3Config.js";
+import QualityControl from "../Schema/QualityControlSchema.js";
+import Production from "../Schema/ProductionSchema.js";
 // data management
 export const uploadCSV = async (req, res) => {
     try {
@@ -432,17 +435,30 @@ export const deleteEmployee = async (req, res) => {
 //get all access requests
 export const getAccessRequests = async (req, res) => {
     try {
-        const accessRequests = await AccessControl.find({ status: "pending",role:"resource_analyst" });
+        const accessRequests = await AccessControl.find({ status: "pending", role: "resource_analyst" }).lean();
+
         if (accessRequests.length === 0) {
             return res.status(404).json({ error: 'No access requests found' });
         }
 
-        res.status(200).json({ accessRequests });
+        // Fetch employee details for each access request
+        const updatedRequests = await Promise.all(accessRequests.map(async (emp) => {
+            const employeeDetails = await Employee.findOne({ employeeId: emp.employeeId }).lean();
+
+            return {
+                ...emp, // Spread original request
+                name: employeeDetails ? employeeDetails.name : null,
+                email: employeeDetails ? employeeDetails.email : null
+            };
+        }));
+
+        res.status(200).json({ accessRequests: updatedRequests });
     } catch (error) {
         console.error('Error fetching access requests:', error);
         res.status(500).json({ error: error.message });
     }
-}
+};
+
 
 // Grant access to read the product data
 export const grantAccess = async (req, res) => {
@@ -577,5 +593,53 @@ export const getTransactionHistory = async (req, res) => {
         console.error('Error fetching transaction history:', error);
     }
 }
+// get the rejected Products
+export const getRejectedProducts = async(req,res)=>{
+    try{
+        const rejectedProducts = await RejectedProduct.find({}).lean();
+        if (rejectedProducts.length === 0) {
+            return res.status(404).json({ error: 'No rejected Products found' });
+        }
+        const rejectedProductDetails = await Promise.all(rejectedProducts.map(async(rp)=>{
+            const empDetails = await Employee.findOne({employeeId:rp.rejectedBy}).lean();
+            return{
+                ...rp,
+                name: empDetails ? empDetails.name : null,
+                email: empDetails ? empDetails.email : null
+            }
+        }))
+        res.status(200).json({message:"Rejected products Successfuly fetched",rejectedProductDetails})
 
+    }catch(error){
+        res.status(500).json({error:"Error on getting rejected Products"})
+        console.log("Error on getting rejected products",error)
+    }
+}
 
+//generate production report
+export const productionReport = async (req, res) => {
+    try {
+        const productionData = await Production.find({  })
+        if (productionData.length === 0) {
+            res.status(404).json({message:"Production not found "})
+        }
+        res.status(200).json({message:"Production report generated",data:productionData})
+    } catch (error) {
+        res.status(500).json({error:error.message})
+    }
+}
+
+//generate quality report
+
+export const qualityReport = async(req,res)=>{
+    try{
+        const qualityReports = await QualityControl.find({ })
+        if (qualityReports.length === 0) {
+            return res.status(400).json({message:"No more quality Check submitted"})
+        }
+        res.status(200).json({message:"Production report generated successfully",qualityReports})
+    }catch(error){
+        res.status(500).json({message:"Generate Erron on Quality Report"})
+        console.log("Error on quality report generator ",error)
+    }
+}

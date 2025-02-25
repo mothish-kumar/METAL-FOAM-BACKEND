@@ -201,7 +201,8 @@ export const deleteData = async (req, res) => {
     }
 }
 
-export const getAllRequests = async (req, res) => { 
+export const 
+getAllRequests = async (req, res) => { 
     try {
         const AccessRequests = await ProductionAccessRequest.find({ requestStatus: 'pending' });
         if(AccessRequests.length === 0){
@@ -217,7 +218,7 @@ export const grantAccess = async (req, res) => {
     try {
         const designSupportId = req.username;
         const { txnHash } = req.params;
-        const { duration } = req.body;  // duration should be in days
+        const {duration ,employeeId} = req.body;  // duration should be in days
         const accessType = "read";
 
         // Validate duration
@@ -227,7 +228,7 @@ export const grantAccess = async (req, res) => {
             });
         }
 
-        const employee = await ProductionAccessRequest.findOne({ transactionHash: txnHash });
+        const employee = await ProductionAccessRequest.findOne({ transactionHash: txnHash,employeeId:employeeId });
         if (!employee) {
             return res.status(404).json({ error: 'Employee Request not found' });
         }
@@ -238,7 +239,7 @@ export const grantAccess = async (req, res) => {
 
         // Update or create access control
         const accessControl = await ProductionAccessRequest.findOneAndUpdate(
-            { transactionHash:txnHash },
+            { transactionHash:txnHash ,employeeId:employeeId },
             {
                 accessType,
                 grantedBy: designSupportId,
@@ -248,8 +249,8 @@ export const grantAccess = async (req, res) => {
             },
             { upsert: true, new: true }
         );
-        const employeeId = employee.employeeId;
-        const employeeDetails = await Employee.findOne({ employeeId });
+        const employeeID = employee.employeeId;
+        const employeeDetails = await Employee.findOne({ employeeId:employeeID });
 
         // Send email notification
         const emailContent = `

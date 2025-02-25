@@ -44,7 +44,7 @@ export const getAllDesignData = async (startIndex,endIndex) => {
                  transactionHash: txnHashes[i],
                  encryptedHash: encryptedHashes[i],
                  initialVector: initialVectors[i],
-                 timestamp: timestamps[i]
+                 timestamp: timestamps[i].toString()
              });
          }
         return { response: true, data: formattedData };

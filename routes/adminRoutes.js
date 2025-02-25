@@ -1,8 +1,11 @@
 import express from "express";
 import multer from "multer";
-import { uploadCSV, getAllProductData, addProduct, deleteAllProductData, getProduct, deleteProduct, updateProduct, approveEmployee, denyEmployee, getAllEmployeeData, deleteEmployee, grantAccess, getAccessRequests, denyAccess, getLoggedInUsers,getTransactionHistory } from "../controllers/adminController.js";
+import { uploadCSV, getAllProductData, addProduct, deleteAllProductData, getProduct, deleteProduct, updateProduct, approveEmployee, denyEmployee, getAllEmployeeData, deleteEmployee, grantAccess, getAccessRequests, denyAccess, getLoggedInUsers,getTransactionHistory, getRejectedProducts, qualityReport, productionReport } from "../controllers/adminController.js";
+import { getAllData as raController} from "../controllers/resourceAnalystController.js";
+import { getAllData as dsController } from "../controllers/designSupportController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { adminMiddelware } from "../middlewares/adminMiddleware.js";
+
 
 
 const router = express.Router();
@@ -53,3 +56,18 @@ router.get("/logged-in-users",authMiddleware,adminMiddelware, getLoggedInUsers);
 // Get the transaction history
 router.get("/get-transaction-history",authMiddleware,adminMiddelware, getTransactionHistory);
 export default router;
+
+//Get the rejected Products
+router.get('/get-rejected-products',authMiddleware,adminMiddelware,getRejectedProducts)
+
+// get the Resource Analyst Reports
+router.get('/get-ra-report',authMiddleware,adminMiddelware,raController)
+
+//ger the Design Support Reports
+router.get('/get-ds-report',authMiddleware,adminMiddelware,dsController)
+
+//get the Production and Assembly report 
+router.get('/get-pa-report',authMiddleware,adminMiddelware,productionReport)
+
+//get the quality report
+router.get('/get-qa-report',authMiddleware,adminMiddelware,qualityReport)

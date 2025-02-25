@@ -1,3 +1,4 @@
+import Production from "../Schema/ProductionSchema.js";
 import QualityControl from "../Schema/QualityControlSchema.js";
 
 export const getStatus = async (req, res) => {
@@ -33,6 +34,12 @@ export const submitQualityAssement = async (req, res) => {
         if (!improvementSuggestions) {
             improvementSuggestions = "No comments"
         }
+        if(qualityStatus === 'Approved'){
+            await Production.findOneAndUpdate({productionId},{productionStatus:'Completed'})
+        }
+        if(qualityStatus === 'Rework'){
+            await Production.findOneAndUpdate({productionId},{productionStatus:'Rework'})
+        }
         const qualityAssement = await QualityControl.findOneAndUpdate({productionId},{
             qualityStatus, rejectionReason, improvementSuggestions, approvalDate, approvedBy, 'testResults.youngsModulus': youngsModulus,
             'testResults.corrosionResistance': corrosionResistance,
@@ -60,3 +67,4 @@ export const reportGenerator = async (req, res) => {
         res.status(500).json({error:error.message})
     }
 }
+

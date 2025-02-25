@@ -3,9 +3,11 @@ import { authMiddleware } from '../middlewares/authMiddleware.js';
 import {qualityControlMiddleware} from '../middlewares/qualityControlMiddleware.js'
 import { makeRequest, getSingleData } from '../controllers/productionController.js';
 import { getStatus,submitQualityAssement,reportGenerator} from '../controllers/qualityController.js';
+import { getAllData } from '../controllers/productionController.js';
 
 const router = express.Router();
 
+router.get('/get-request-data', authMiddleware, qualityControlMiddleware, getAllData)
 router.post('/make-request', authMiddleware, qualityControlMiddleware, makeRequest)
 
 //designSupport product data getter

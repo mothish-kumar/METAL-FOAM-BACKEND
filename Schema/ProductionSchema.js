@@ -6,7 +6,7 @@ const productionSchema = new mongoose.Schema({
     productionName: { type: String, required: true }, 
     productionStatus: { 
         type: String, 
-        enum: ["Not_Started", "In_Progress", "Completed", "Quality_Check"], 
+        enum: ["Not_Started", "In_Progress", "Completed", "Quality_Check","Rework"], 
         default: "Not_Started" 
     },
 

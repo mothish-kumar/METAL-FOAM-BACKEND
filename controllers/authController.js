@@ -24,7 +24,7 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
         await user.updateLoginStatus(true);
-        res.status(200).json({ message: 'Login successful', accesstoken, refreshToken }); //testing refresh token 
+        res.status(200).json({ message: 'Login successful', accesstoken}); 
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal server error' });
