@@ -2,6 +2,8 @@ import Login from "../Schema/LoginSchema.js";
 import Employee from "../Schema/EmployeeSchema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import {sendMail} from "../utils/mailSender.js";
+import FeaturedMaterial from "../Schema/FeaturedMaterialSchema.js";
 
 
 export const login = async (req, res) => {
@@ -24,7 +26,7 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
         await user.updateLoginStatus(true);
-        res.status(200).json({ message: 'Login successful', accesstoken}); 
+        res.status(200).json({ message: 'Login successful', accesstoken,role:employee.role }); 
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal server error' });
@@ -85,4 +87,34 @@ export const refreshToken = async (req, res) => {
         }
         res.status(500).json({ error: 'Internal server error' });
    }
+}
+
+export const landingPageMail = async (req,res) => {
+    try {
+        const { name, email, message } = req.body;
+        const subject = 'New message from Landing Page';
+        const text = `Name: ${name}\nEmail: ${email}\nMessage: ${message}`;
+        await sendMail(process.env.EMAIL_USER, subject, text);
+        res.status(200).json({ message: 'Email sent successfully' });
+    }catch(error){
+        console.error('Error during sending email:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const getFeaturedMaterails = async (req,res) => {
+    try{
+        const featuredMaterials = await FeaturedMaterial.find();
+        res.status(200).json({featuredMaterials});
+    }catch(error){
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+export const getEmails = async (req,res) => {
+    try{
+        const emp= await Employee.find({})
+        res.status(200).json({emails:emp.map(e=>e.email)});
+    }catch(error){
+        res.status(500).json({ error: 'Internal server error' });
+    }
 }

@@ -12,6 +12,7 @@ import bcrypt from "bcrypt";
 import web3 from "../config/Web3Config.js";
 import QualityControl from "../Schema/QualityControlSchema.js";
 import Production from "../Schema/ProductionSchema.js";
+import FeaturedMaterial from "../Schema/FeaturedMaterialSchema.js";
 // data management
 export const uploadCSV = async (req, res) => {
     try {
@@ -575,14 +576,31 @@ export const getTransactionHistory = async (req, res) => {
     for (let i = 1; i <= blockNumber; i++){
         const block = await web3.eth.getBlock(i, true);
         if (block && block.transactions) {
+            const ETH_TO_INR_RATE = 350000;
             block.transactions.forEach(tx => {
+                let distributionType = "Unknown";
+                let ethAmount = web3.utils.fromWei(tx.value.toString(), 'ether');
+
+
+        if (tx.to === null) {
+            distributionType = "Contract Creation";
+        } else if (tx.input !== '0x' && tx.value === "0") {
+            distributionType = "Contract Interaction";
+        } else if (tx.value > 0 && tx.input === '0x') {
+            distributionType = "Native Transfer";
+        } else if (tx.input.length > 10) {
+            distributionType = "Token Transfer";
+        }
+
                 transactions.push({
                     blockNumber: block.number.toString(),
+                    timestamp: block.timestamp.toString(),
                     from: tx.from,
                     to: tx.to,
-                    value: web3.utils.fromWei(tx.value.toString(), 'ether'), // Convert value to ether
+                    value: (parseFloat(ethAmount) * ETH_TO_INR_RATE).toFixed(2), 
                     gasUsed: tx.gas.toString(),
                     hash: tx.hash,
+                    type:distributionType
                 });
             });
         }
@@ -641,5 +659,16 @@ export const qualityReport = async(req,res)=>{
     }catch(error){
         res.status(500).json({message:"Generate Erron on Quality Report"})
         console.log("Error on quality report generator ",error)
+    }
+}
+
+export const featuredMaterial  = async (req,res)=>{
+    try{
+        const {productName,materialType,materialSpecification,qualityString} = req.body
+        const featuredMaterial = new FeaturedMaterial({productName,materialType,materialSpecification,qualityString})
+        await featuredMaterial.save()
+        res.status(200).json({message:"Featured Material Added Successfully"})
+    }catch(error){
+        res.status(500).json({error:error.message})
     }
 }
