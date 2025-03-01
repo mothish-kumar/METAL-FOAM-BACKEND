@@ -664,10 +664,40 @@ export const qualityReport = async(req,res)=>{
 
 export const featuredMaterial  = async (req,res)=>{
     try{
-        const {productName,materialType,materialSpecification,qualityString} = req.body
-        const featuredMaterial = new FeaturedMaterial({productName,materialType,materialSpecification,qualityString})
+        const {productId,productName,materialType,materialSpecification,qualityString} = req.body
+        const featuredMaterial = new FeaturedMaterial({productId,productName,materialType,materialSpecification,qualityString})
         await featuredMaterial.save()
         res.status(200).json({message:"Featured Material Added Successfully"})
+    }catch(error){
+        res.status(500).json({error:error.message})
+    }
+}
+
+export const removeFeaturedMaterial = async (req, res) => {
+    try {
+        const productId = req.params.productId;
+        const deletedMaterial = await FeaturedMaterial.findOneAndDelete({ productId });
+
+        if (!deletedMaterial) {
+            return res.status(404).json({ message: 'Featured Material not found' });
+        }
+
+        res.status(200).json({ message: 'Featured Material removed successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const getFeturedMaterial = async(req,res)=>{
+    try{
+        const productId =  req.params.productId;
+        const featuredProduct = await FeaturedMaterial.findOne({productId})
+        if(featuredProduct){
+            res.status(200).json({isFeatured:true})
+        }else{
+            res.status(200).json({isFeatured:false})
+        }
+
     }catch(error){
         res.status(500).json({error:error.message})
     }

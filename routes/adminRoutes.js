@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { uploadCSV, getAllProductData, addProduct, deleteAllProductData, getProduct, deleteProduct, updateProduct, approveEmployee, denyEmployee, getAllEmployeeData, deleteEmployee, grantAccess, getAccessRequests, denyAccess, getLoggedInUsers,getTransactionHistory, getRejectedProducts, qualityReport, productionReport,featuredMaterial } from "../controllers/adminController.js";
+import { uploadCSV, getAllProductData, addProduct, deleteAllProductData, getProduct, deleteProduct, updateProduct, approveEmployee, denyEmployee, getAllEmployeeData, deleteEmployee, grantAccess, getAccessRequests, denyAccess, getLoggedInUsers,getTransactionHistory, getRejectedProducts, qualityReport, productionReport,featuredMaterial, removeFeaturedMaterial, getFeturedMaterial } from "../controllers/adminController.js";
 import { getAllData as raController} from "../controllers/resourceAnalystController.js";
 import { getAllData as dsController } from "../controllers/designSupportController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -74,3 +74,9 @@ router.get('/get-qa-report',authMiddleware,adminMiddelware,qualityReport)
 
 //set featured material
 router.post('/set-featured-material',authMiddleware,adminMiddelware, featuredMaterial)
+
+//delete feature material
+router.delete('/remove-featured-material/:productId',authMiddleware,adminMiddelware,removeFeaturedMaterial)
+
+//check featured material
+router.get('/check-featured-material/:productId',authMiddleware,adminMiddelware,getFeturedMaterial)

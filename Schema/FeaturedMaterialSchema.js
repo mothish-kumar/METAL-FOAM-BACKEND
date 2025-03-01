@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 import { type } from "os";
 
 const featuredMaterialSchema = new mongoose.Schema({
+    productId:{
+        type:String,
+        required:true
+    },
     productName: {
         type: String,
         required: true
