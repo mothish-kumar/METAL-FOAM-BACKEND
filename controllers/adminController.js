@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { access } from "fs";
 import csv from "csv-parser";
 import { encryptData, decryptData } from "../utils/encryption.js";
 import { saveProductDataBatch, productCount as getProductCount, getAllProductData as fetchProductData, saveProductData, deleteAllProducts, deleteProductById, getProductById, updateProductById } from "../services/ProductStoreServices.js";
@@ -439,7 +439,7 @@ export const getAccessRequests = async (req, res) => {
         const accessRequests = await AccessControl.find({ status: "pending", role: "resource_analyst" }).lean();
 
         if (accessRequests.length === 0) {
-            return res.status(404).json({ error: 'No access requests found' });
+            return res.status(200).json({ accessRequests:[] });
         }
 
         // Fetch employee details for each access request
@@ -484,19 +484,22 @@ export const grantAccess = async (req, res) => {
         // Calculate expiration date properly
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + parseInt(duration));
+        
 
         // Update or create access control
         const accessControl = await AccessControl.findOneAndUpdate(
-            { employeeId },
-            {
-                accessType,
-                grantedBy: adminId,
-                grantedAt: new Date(),
-                expiresAt: expiresAt,
-                status: 'active'
-            },
-            { upsert: true, new: true }
-        );
+            { employeeId }, 
+    {
+        $set: {
+            accessType,
+            grantedBy: adminId,
+            grantedAt: new Date(),
+            expiresAt: expiresAt,
+            status: 'active'
+        }
+    },
+    { upsert: false, new: true } 
+      );
 
         // Send email notification
         const emailContent = `
@@ -530,7 +533,7 @@ export const denyAccess = async (req, res) => {
         if (!employee) {
             return res.status(404).json({ error: 'Employee not found' });
         }
-        const accessControl = await AccessControl.findOneAndUpdate({ employeeId }, { status: 'denied' });
+        const accessControl = await AccessControl.findOneAndDelete({ employeeId });
 
 
         const emailContent = `
