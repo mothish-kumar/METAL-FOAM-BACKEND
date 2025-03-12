@@ -344,9 +344,9 @@ export const deleteAnalysisData = async (req, res) => {
     const txnHash = req.params.txnHash;
     try {
         const result = await deleteData(txnHash);
-        res.status(200).json({message:"Data deleted successfully",receipt:result.receipt})
+        res.status(200).json({message:"Data deleted successfully"})
     } catch (error) {
-        res.status(500).json({message:"Error on deleting data",error})
+        res.status(500).json({message:"Error on deleting data",error:error.message})
     }
 }
 
@@ -364,7 +364,7 @@ export const getTotalCount = async (req, res) => {
 
 export const getAccessRequests = async (req, res) => {
     try {
-        const accessRequests = await AccessControl.find({ status: "pending",role:"design_support" });
+        const accessRequests = await AccessControl.find({ role:"design_support" });
         if (accessRequests.length === 0) {
             return res.status(404).json({ error: 'No access requests found' });
         }
@@ -443,7 +443,7 @@ export const denyAccess = async (req, res) => {
         if (!employee) {
             return res.status(404).json({ error: 'Employee not found' });
         }
-        const accessControl = await AccessControl.findOneAndUpdate({ employeeId }, { status: 'denied' });
+        const accessControl = await AccessControl.findOneAndDelete({ employeeId });
 
 
         const emailContent = `
