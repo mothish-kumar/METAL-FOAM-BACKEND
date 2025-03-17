@@ -19,26 +19,30 @@ const rejectedProductSchema = new mongoose.Schema({
     additionalNotes: { type: String } 
 }, { timestamps: true, collection: 'rejected_products' });
 
-const RejectedProduct = mongoose.model('RejectedProduct', rejectedProductSchema);
 // Pre-save middleware to auto-generate rejectionId
 rejectedProductSchema.pre('save', async function(next) {
     try {
         if (!this.rejectionId) {
-            const lastProduction = await this.constructor.findOne({}, {}, { sort: { 'rejectionId': -1 } });
+            const lastProduction = await this.constructor.findOne()
+                .sort({ rejectedAt: -1 }) 
+            
             let nextNumber = 1;
             
             if (lastProduction && lastProduction.rejectionId) {
-                const lastNumber = parseInt(lastProduction.rejectionId.replace('RJ', ''));
+                const lastNumber = parseInt(lastProduction.rejectionId.replace('RJ', ''), 10);
                 if (!isNaN(lastNumber)) {
                     nextNumber = lastNumber + 1;
                 }
             }
             
-            this.rejectionId = `RJ${String(nextNumber).padStart(3, '0')}`;
+            this.rejectionId = `RJ${String(nextNumber).padStart(3, '0')}`; 
         }
         next();
     } catch (error) {
         next(error);
     }
 });
+
+const RejectedProduct = mongoose.model('RejectedProduct', rejectedProductSchema);
+
 export default RejectedProduct;

@@ -2,7 +2,7 @@ import express from 'express'
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import {qualityControlMiddleware} from '../middlewares/qualityControlMiddleware.js'
 import { makeRequest, getSingleData } from '../controllers/productionController.js';
-import { getStatus,submitQualityAssement,reportGenerator} from '../controllers/qualityController.js';
+import { getStatus,submitQualityAssement,reportGenerator,getProductionOption} from '../controllers/qualityController.js';
 import { getAllData } from '../controllers/productionController.js';
 
 const router = express.Router();
@@ -20,5 +20,7 @@ router.get('/get-status', authMiddleware, qualityControlMiddleware, getStatus)
 router.post('/submit-report/:productionId', authMiddleware, qualityControlMiddleware, submitQualityAssement)
 
 router.get('/report/:productionId',authMiddleware,qualityControlMiddleware,reportGenerator)
+router.get('/getProduction',authMiddleware,qualityControlMiddleware,getProductionOption)
+
 
 export default router;

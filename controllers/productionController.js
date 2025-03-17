@@ -10,13 +10,8 @@ export const getAllData = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const employeeId = req.username;
-        let AccessStatus; 
-        const AccessRequests = await ProductionAccessRequest.find({ employeeId });
-        if (AccessRequests.length === 0) { 
-            AccessStatus = 'Make a request';
-        } else {
-            AccessStatus = AccessRequests[0].requestStatus;
-        }
+        const accessRequests = await ProductionAccessRequest.find({ employeeId });
+
 
         const { total } = await getTotal();
         const numericTotal = Number(total);
@@ -57,6 +52,8 @@ export const getAllData = async (req, res) => {
             try {
                 const decryptedData = decryptData(product.encryptedHash, product.initialVector);
                 const parsedData = JSON.parse(decryptedData);
+                const productAccessRequest = accessRequests.find(req => req.productId === parsedData.productId);
+                let accessStatus = productAccessRequest ? productAccessRequest.requestStatus : 'Make a request';
 
                 productData.push({
                     transactionHash: product.transactionHash,
@@ -64,7 +61,7 @@ export const getAllData = async (req, res) => {
                     productId: parsedData.productId,
                     productName: parsedData.productName,
                     designSupportApprovalStatus: parsedData.finalApprovalStatus,
-                    accessStatus: AccessStatus
+                    accessStatus
                 });
             } catch (error) {
                 throw new Error(`Error on decryption for product ${product.transactionHash}: ${error.message}`);
@@ -185,7 +182,7 @@ export const getProduction = async (req, res) => {
         if(production.length === 0){
             return res.status(200).json({ message: 'No production is started' });
         }
-        res.status(200).json({ message: 'Production in list', InProgressProduction: production });
+        res.status(200).json({ message: 'Production in list', productionData: production });
     } catch (error) {
         res.status(500).json({message: error.message});
     }
@@ -238,6 +235,17 @@ export const generateReport = async (req, res) => {
         }
         res.status(200).json({message:"Production report generated",data:productionData})
     } catch (error) {
+        res.status(500).json({error:error.message})
+    }
+}
+
+export const getProductOptions =async (req,res)=>{
+    try{
+        const productionEmployeeId = req.username;
+        const requestStatus = "active"
+        const options = await ProductionAccessRequest.find({employeeId:productionEmployeeId,requestStatus})
+        res.status(200).json({options})
+    }catch(error){
         res.status(500).json({error:error.message})
     }
 }

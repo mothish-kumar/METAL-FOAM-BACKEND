@@ -1,6 +1,7 @@
 import Production from "../Schema/ProductionSchema.js";
 import QualityControl from "../Schema/QualityControlSchema.js";
 
+
 export const getStatus = async (req, res) => {
     try {
         const searchQuery = req.query.qualityStatus;
@@ -24,23 +25,24 @@ export const submitQualityAssement = async (req, res) => {
         const productionId = req.params.productionId
         const approvedBy = qualityEmployeeId;
         const approvalDate = Date.now();
-        let { qualityStatus, youngsModulus, corrosionResistance, weightEfficiency, tensileStrength, weldIntegrity, corrosionImpact, weightRetention, rejectionReason, improvementSuggestions } = req.body;
+        let { qualityStatus, youngsModulus, corrosionResistance, weightEfficiency, tensileStrength, weldIntegrity, corrosionImpact, weightRetention, rejectionReason, improvementSuggestions,reworkIssue } = req.body;
         if (!qualityStatus || !youngsModulus || !corrosionResistance || !weightEfficiency || !tensileStrength || !weldIntegrity || !corrosionImpact || !weightRetention) {
             res.status(400).json({message:"Missing Fields are required"})
         }
         if (!rejectionReason) {
             rejectionReason = "none"
-        }
+        } 
         if (!improvementSuggestions) {
             improvementSuggestions = "No comments"
         }
         if(qualityStatus === 'Approved'){
-            await Production.findOneAndUpdate({productionId},{productionStatus:'Completed'})
+            await Production.findOneAndUpdate({productionId},{productionStatus:'Completed',finishedAt: Date.now()})
+            await QualityControl.findOneAndDelete({productionId})
         }
         if(qualityStatus === 'Rework'){
-            await Production.findOneAndUpdate({productionId},{productionStatus:'Rework'})
+            await Production.findOneAndUpdate({productionId},{productionStatus:'Rework',reworkIssue})
         }
-        const qualityAssement = await QualityControl.findOneAndUpdate({productionId},{
+         await QualityControl.findOneAndUpdate({productionId},{
             qualityStatus, rejectionReason, improvementSuggestions, approvalDate, approvedBy, 'testResults.youngsModulus': youngsModulus,
             'testResults.corrosionResistance': corrosionResistance,
             'testResults.weightEfficiency': weightEfficiency,
@@ -67,4 +69,16 @@ export const reportGenerator = async (req, res) => {
         res.status(500).json({error:error.message})
     }
 }
+
+export const getProductionOption = async(req,res)=>{
+    try{
+        const productionId = await QualityControl.find({},'productionId')
+        const productionIds = productionId.map(doc => doc.productionId);
+        res.status(200).json({productionId: productionIds})
+
+    }catch(error){
+        res.status(500).json({error:error.message})
+    }
+}
+
 

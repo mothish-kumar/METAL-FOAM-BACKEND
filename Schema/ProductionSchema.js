@@ -14,6 +14,7 @@ const productionSchema = new mongoose.Schema({
     startedAt: { type: Number }, 
     finishedAt: { type: Number },
 
+
     // Production Report
     productionReport: {
         metrics: {
@@ -26,7 +27,7 @@ const productionSchema = new mongoose.Schema({
 
     sentForQualityCheckAt: { type: Number },
     productionEmployeeId: { type: String,required: true },
-
+    reworkIssue:{type:String}
 }, { timestamps: true, collection: 'production' });
 
 // Pre-save middleware to auto-generate productionId

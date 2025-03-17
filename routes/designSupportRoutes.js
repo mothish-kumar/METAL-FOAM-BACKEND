@@ -3,7 +3,7 @@ import { dataAccessMiddleware } from '../middlewares/dataAccessMiddleware.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 import {designSupportMiddleware} from '../middlewares/designSupportMiddleware.js';
 import { getAllData, getSingleData } from '../controllers/resourceAnalystController.js';
-import { processMaterial,predictWelding,saveData,getAllData as getAllDataController,getSingleData as GSD,updateData,deleteData,getAllRequests,grantAccess } from '../controllers/designSupportController.js';
+import { processMaterial,predictWelding,saveData,getAllData as getAllDataController,getSingleData as GSD,updateData,deleteData,getAllRequests,grantAccess,denyAccess } from '../controllers/designSupportController.js';
 
 
 const router = express.Router();
@@ -26,6 +26,8 @@ router.delete('/delete-design-data/:txnHash', authMiddleware, designSupportMiddl
 // access the data
 router.get('/get-all-requests', authMiddleware, designSupportMiddleware, getAllRequests);
 router.post('/grant-access/:txnHash', authMiddleware, designSupportMiddleware, grantAccess);
+router.post('/deny-access-request/:txnHash',authMiddleware,designSupportMiddleware,denyAccess)
+
 
 
 export default router;

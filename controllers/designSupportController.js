@@ -206,7 +206,7 @@ getAllRequests = async (req, res) => {
     try {
         const AccessRequests = await ProductionAccessRequest.find({ requestStatus: 'pending' });
         if(AccessRequests.length === 0){
-            return res.status(200).json({ message: 'No requests found', requests: [] });
+            return res.status(200).json({ AccessRequests:[] });
         }
         res.status(200).json({AccessRequests });
     } catch (error) {
@@ -218,39 +218,48 @@ export const grantAccess = async (req, res) => {
     try {
         const designSupportId = req.username;
         const { txnHash } = req.params;
-        const {duration ,employeeId} = req.body;  // duration should be in days
+        const { duration, employeeId } = req.body; // duration should be in days
         const accessType = "read";
 
-        // Validate duration
+        // Validate required fields
+        if (!designSupportId) {
+            return res.status(401).json({ error: 'Unauthorized: Missing user ID' });
+        }
+        if (!txnHash || !employeeId) {
+            return res.status(400).json({ error: 'Missing transaction hash or employee ID' });
+        }
         if (!duration || isNaN(duration) || duration <= 0) {
-            return res.status(400).json({ 
-                error: 'Invalid duration. Please provide a positive number of days.' 
-            });
+            return res.status(400).json({ error: 'Invalid duration. Provide a positive number of days.' });
         }
 
-        const employee = await ProductionAccessRequest.findOne({ transactionHash: txnHash,employeeId:employeeId });
+        // Find existing access request
+        const employee = await ProductionAccessRequest.findOne({ transactionHash: txnHash, employeeId });
         if (!employee) {
             return res.status(404).json({ error: 'Employee Request not found' });
         }
 
         // Calculate expiration date properly
         const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + parseInt(duration));
+        expiresAt.setDate(expiresAt.getDate() + parseInt(duration, 10));
 
         // Update or create access control
         const accessControl = await ProductionAccessRequest.findOneAndUpdate(
-            { transactionHash:txnHash ,employeeId:employeeId },
+            { transactionHash: txnHash, employeeId },
             {
                 accessType,
                 grantedBy: designSupportId,
                 grantedAt: new Date(),
-                expiresAt: expiresAt,
+                expiresAt,
                 requestStatus: 'active'
             },
             { upsert: true, new: true }
         );
-        const employeeID = employee.employeeId;
-        const employeeDetails = await Employee.findOne({ employeeId:employeeID });
+
+        // Retrieve employee details
+        const employeeDetails = await Employee.findOne({ employeeId });
+        if (!employeeDetails) {
+            return res.status(404).json({ error: 'Employee details not found' });
+        }
 
         // Send email notification
         const emailContent = `
@@ -264,7 +273,11 @@ export const grantAccess = async (req, res) => {
         Design Support Team
         `;
 
-        await sendMail(employeeDetails.email, 'Access Request Approved', emailContent);
+        try {
+            await sendMail(employeeDetails.email, 'Access Request Approved', emailContent);
+        } catch (mailError) {
+            console.error('Email sending failed:', mailError);
+        }
 
         res.status(200).json({
             message: 'Access granted successfully',
@@ -272,15 +285,16 @@ export const grantAccess = async (req, res) => {
         });
     } catch (error) {
         console.error('Error granting access:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Internal Server Error' });
     }
+};
 
-}
 
 export const denyAccess = async (req, res) => {
     try {
         const { txnHash } = req.params;
-        const employee = await ProductionAccessRequest.findOne({ transactionHash: txnHash });
+        const {employeeID} = req. body
+        const employee = await ProductionAccessRequest.findOne({ transactionHash: txnHash,employeeId:employeeID });
         if (!employee) {
             return res.status(404).json({ error: 'Employee Request not found' });
         }
