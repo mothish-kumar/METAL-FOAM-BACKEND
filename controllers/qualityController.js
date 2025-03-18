@@ -26,9 +26,7 @@ export const submitQualityAssement = async (req, res) => {
         const approvedBy = qualityEmployeeId;
         const approvalDate = Date.now();
         let { qualityStatus, youngsModulus, corrosionResistance, weightEfficiency, tensileStrength, weldIntegrity, corrosionImpact, weightRetention, rejectionReason, improvementSuggestions,reworkIssue } = req.body;
-        if (!qualityStatus || !youngsModulus || !corrosionResistance || !weightEfficiency || !tensileStrength || !weldIntegrity || !corrosionImpact || !weightRetention) {
-            res.status(400).json({message:"Missing Fields are required"})
-        }
+        
         if (!rejectionReason) {
             rejectionReason = "none"
         } 
@@ -36,6 +34,9 @@ export const submitQualityAssement = async (req, res) => {
             improvementSuggestions = "No comments"
         }
         if(qualityStatus === 'Approved'){
+            if (!qualityStatus || !youngsModulus || !corrosionResistance || !weightEfficiency || !tensileStrength || !weldIntegrity || !corrosionImpact || !weightRetention) {
+                res.status(400).json({message:"Missing Fields are required"})
+            }
             await Production.findOneAndUpdate({productionId},{productionStatus:'Completed',finishedAt: Date.now()})
             await QualityControl.findOneAndDelete({productionId})
         }
@@ -60,7 +61,7 @@ export const submitQualityAssement = async (req, res) => {
 export const reportGenerator = async (req, res) => {
     try {
         const productionId = req.params.productionId;
-        const qualityReport = await QualityControl.findOne({ productionId })
+        const qualityReport = await Production.findOne({ productionId })
         if (!qualityReport) {
             return res.status(400).json({message:"No more quality Check submitted"})
         }
@@ -72,10 +73,19 @@ export const reportGenerator = async (req, res) => {
 
 export const getProductionOption = async(req,res)=>{
     try{
-        const productionId = await QualityControl.find({},'productionId')
+        const productionId = await QualityControl.find({qualityStatus:'Pending'},'productionId')
         const productionIds = productionId.map(doc => doc.productionId);
         res.status(200).json({productionId: productionIds})
 
+    }catch(error){
+        res.status(500).json({error:error.message})
+    }
+}
+
+export const reportGeneratorOptions = async(req,res)=>{
+    try{
+        const production = await Production.find({productionStatus:'Completed'})
+        res.status(200).json({data:production})
     }catch(error){
         res.status(500).json({error:error.message})
     }
